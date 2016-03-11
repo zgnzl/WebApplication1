@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+@*<div class="jumbotron">
+    <h1>ASP.NET</h1>
+    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
+    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>*@
+
+@*<div class="row">
+    <div class="col-md-4">
+        <h2>Getting started</h2>
+        <p>
+            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
+            enables a clean separation of concerns and gives you full control over markup
+            for enjoyable, agile development.
+        </p>
+        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Get more libraries</h2>
+        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
+        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+    </div>
+    <div class="col-md-4">
+        <h2>Web Hosting</h2>
+        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
+        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+    </div>
+    
+</div>*@
+<div>
+    <hr />
+    <h1>啊哈</h1>
+    @{ 
+        for (int i = 1; i < 11; i++)
+        {
+   <input id="@i" type="checkbox" onclick="checkbox(@i)"  value="@i" />
+<span>@Html.Raw("第个"+(i)+"选择项")</span>
+    <br />
+        }
+    }
+    <br />
+    <input type="button" onclick="commit()" value="显示数据"/><br />
+    <input id="abc" value="" style="border:0;background-color:white;width:100%"  />
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+    <a href="#" onclick="openurl(); return false;" target="_blank">复制打开</a>
+        <script>
+            var db,opendb;
+            if (indexedDB)
+            {
+                var sd = indexedDB.deleteDatabase("browerDB");
+                sd.onsuccess = function (e) {
+                    console.log("删除数据库browerDB成功");
+                }
+                    opendb = indexedDB.open("browerDB",1);
+                    opendb.onsuccess = function (e1) {
+                        console.log("打开成功");
+                        var store;
+                     
+                        var trans = db.transaction("dbstore", "readwrite");
+                        store = trans.objectStore("dbstore");
+                        var o = { p: 123 };
+                        var addrequest = store.add(o, 1);
+                        trans.oncomplete = function (e) {
+                            console.log("事务创建完成");
+                        }
+                        addrequest.onsuccess = function () {
+                            console.log("向dbstore仓库添加数据成功");
+                        }
+                    }
+                    opendb.onerror = function (e2) {
+                        console.log("打开失败");
+                    }
+                    opendb.onupgradeneeded = function (e3) {
+                        console.log("数据库已升级");
+                        db = opendb.result;
+                       
+                        if (!db.objectStoreNames.contains("dbstore"))
+                        {
+                            console.log("不存在dbstore仓库");
+                           db.createObjectStore("dbstore", {autoIncrement:true})
+                        }
+                       
+                    }
+               
+            }
+            else {
+                alert(123);
+       
+            }
+            function checkbox(obj) {
+                if ($("#" + obj).is(':checked')) {
+                    var item = localStorage.getItem($("#abc").val());
+                    if (item == null) {
+                        localStorage.setItem($("#abc").val(), "checkbox" + obj + ";");
+                    }
+                    else {
+                        localStorage.setItem($("#abc").val(), item + "checkbox" + obj + ";");
+                    }
+
+                }
+                else {
+
+                    var item = localStorage.getItem($("#abc").val());
+                    var items = item.toString().split(';')
+                    items.splice(jQuery.inArray("checkbox" + obj, items), 1);
+                    //  alert(items + "checkbox" + obj + "_" + jQuery.inArray("checkbox" + obj, items) + "__" + $.inArray("checkbox" + obj, items));
+                    var itemvalue = items.join(';');
+                    localStorage.setItem($("#abc").val(), itemvalue);
+                }
+
+            }
+            function commit() {
+                //var cl = localStorage.getItem($("#abc").val());
+                //alert(cl)
+            }
+          
+        function openurl() { 
+            window.open("#", Math.random().toString() + Date.now().toLocaleString());
+        }
+        $(function () {
+            var los = Math.random().toString() + Date.now().toLocaleString();
+            $("#abc").val(los);
+        })
+        </script>
+    </div>
