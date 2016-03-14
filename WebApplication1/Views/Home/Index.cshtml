@@ -50,39 +50,114 @@
             var db,opendb;
             if (indexedDB)
             {
+                var peoplestore;
                 var sd = indexedDB.deleteDatabase("browerDB");
                 sd.onsuccess = function (e) {
                     console.log("删除数据库browerDB成功");
                 }
                     opendb = indexedDB.open("browerDB",1);
                     opendb.onsuccess = function (e1) {
+                        db = opendb.result;
                         console.log("打开成功");
-                        var store;
-                     
+                        var peopletrans=db.transaction("people","readwrite");
+                        var peoplestore=peopletrans.objectStore("people");
+                        peoplestore.onsuccess=function(e){
+                            console.log("仓库people事务完成");
+                        }
+                        var person1 = {
+                            name:"aa1",
+                            email:"aa1@cnki.net",
+                            created:new Date()
+                        }
+                        var person = {
+                            name:"aa",
+                            email:"aa@cnki.net",
+                            created:new Date()
+                        }
+                        var add=peoplestore.add(person1);
+                        peoplestore.add(person);
+                     add.onsuccess=function(e){
+                         console.log("peopleadd添加完成");
+                     }
+                     var peopletrans=db.transaction("people","readonly");
+                     var peoplestore=peopletrans.objectStore("people");
+                     var peopleindex=peoplestore.index("name");
+                     var peopleget=peopleindex.get("aa");
+                     var range=IDBKeyRange.bound('a','c',false,false)
+                     var peoplecousor=peopleindex.openCursor(range);
+                     peoplecousor.onsuccess=function(e){
+                         var res=e.target.result;
+                         if(res)
+                         {
+                             console.log("cursor读取key："+res.key)
+                             for(var filed in res.value)
+                             {
+                                 console.log("cursor读取值"+res.value[filed]);
+                             }
+                             res.continue();
+                         }
+                     }
+                     peopleget.onsuccess=function(e){
+                         console.log("people读取get成功"+JSON.stringify(e.target.result));
+                     }
                         var trans = db.transaction("dbstore", "readwrite");
-                        store = trans.objectStore("dbstore");
-                        var o = { p: 123 };
-                        var addrequest = store.add(o, 1);
+                        var readtrans=db.transaction("dbstore","readonly");
+                        var store = trans.objectStore("dbstore");
+                        var  readstore=trans.objectStore("dbstore");
+                        var o =[{"stuName":[{"name":"Tom"},{"name":"Jack"},{"name":"jony"}],
+                            "className":
+                            [{"class":"基础日语"},{"class":"中级日语"},{"class":"Java SE"}]
+                        }];
+                        var addrequest = store.add("browerDB", 1);
+                        store.add("browerDB2", 2);
+                        var cousor=store.openCursor();
+                        cousor.onsuccess=function(e){
+                            var res=e.target.result;
+                            if(res)
+                            {
+                                console.log("cousor遍历数据"+res.key+":"+res.value);
+                                res.continue();
+                            }
+                        }
+                        //var del=  store.delete(1);
+                        //del.onsuccess=function(e){
+                        //    console.log("数据删除：");
+                        //}
+                        var update=store.put(o,1)
+                        var s=  readstore.get(1);
+                        update.onsuccess=function(e){
+                            console.log("数据更新："+JSON.stringify(e.target.result));
+                        }
                         trans.oncomplete = function (e) {
-                            console.log("事务创建完成");
+                            console.log("事务创建完成");                          
                         }
                         addrequest.onsuccess = function () {
                             console.log("向dbstore仓库添加数据成功");
+                        }
+                        s.onsuccess=function(es){
+                            var vals=es.currentTarget.result;
+                            var jsonval=eval(JSON.stringify(vals));
+                            console.log("数据读取成功"+JSON.stringify(vals));
                         }
                     }
                     opendb.onerror = function (e2) {
                         console.log("打开失败");
                     }
                     opendb.onupgradeneeded = function (e3) {
-                        console.log("数据库已升级");
+                        console.log("数据库状态更改");
                         db = opendb.result;
-                       
                         if (!db.objectStoreNames.contains("dbstore"))
                         {
                             console.log("不存在dbstore仓库");
                            db.createObjectStore("dbstore", {autoIncrement:true})
                         }
-                       
+                        if(!db.objectStoreNames.contains("people"))
+                        {
+                            console.log("不存在仓库people");
+                            peoplestore=db.createObjectStore("people",{autoIncrement:true});
+                            peoplestore.createIndex("name","name",{unique:false});
+                            peoplestore.createIndex("email","email",{unique:true});
+                        }
                     }
                
             }
